@@ -1,0 +1,205 @@
+#include <stdio.h>
+
+int n, nf;          // Number of pages and number of frames
+int in[100];        // Page reference sequence
+int p[50];          // Frames
+int pgfaultcnt = 0; // Page fault counter
+
+// Function to get input from the user
+void getData()
+{
+    printf("\nEnter length of page reference sequence: ");
+    scanf("%d", &n);
+    printf("Enter the page reference sequence:\n");
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%d", &in[i]);
+    }
+    printf("Enter number of frames: ");
+    scanf("%d", &nf);
+}
+
+// Function to initialize the frames and reset page fault count
+void initialize()
+{
+    pgfaultcnt = 0; // Reset page fault counter
+    for (int i = 0; i < nf; i++)
+    {
+        p[i] = -1; // Use -1 to indicate empty frames
+    }
+}
+
+// Function to check if a page is already in frames
+int isHit(int data)
+{
+    for (int j = 0; j < nf; j++)
+    {
+        if (p[j] == data)
+        {
+            return 1; // Page hit
+        }
+    }
+    return 0; // Page miss
+}
+
+// Function to display current frames with incoming value
+void dispFrames(int incoming)
+{
+    printf(" Incoming: %d | ", incoming);
+    for (int k = 0; k < nf; k++)
+    {
+        if (p[k] != -1)
+            printf(" %d  |", p[k]);
+        else
+            printf(" -  |"); // Indicate empty frame
+    }
+    printf("\n");
+}
+
+// Function to display the total number of page faults
+void dispPgFaultCnt()
+{
+    printf("Total number of page faults: %d\n", pgfaultcnt);
+}
+
+// FIFO page replacement algorithm
+void fifo()
+{
+    initialize();
+    printf("\nFrames:\n");
+    printf("                F1   F2   F3 \n");
+    for (int i = 0; i < n; i++)
+    {
+        if (isHit(in[i]) == 0)
+        { // Page miss
+            // Replace the oldest page
+            for (int k = 0; k < nf - 1; k++)
+                p[k] = p[k + 1]; // Shift pages left
+            p[nf - 1] = in[i];   // Insert new page
+            pgfaultcnt++;
+        }
+        dispFrames(in[i]); // Display current frame state
+    }
+    dispPgFaultCnt();
+}
+
+// Optimal page replacement algorithm
+void optimal()
+{
+    initialize();
+    int near[50];
+    printf("\nFrames:\n");
+    printf(" F1  F2  F3 \n");
+    for (int i = 0; i < n; i++)
+    {
+        if (isHit(in[i]) == 0)
+        { // Page miss
+            for (int j = 0; j < nf; j++)
+            {
+                near[j] = -1; // Initialize future usage index
+                for (int k = i; k < n; k++)
+                {
+                    if (p[j] == in[k])
+                    {
+                        near[j] = k; // Index in future
+                        break;
+                    }
+                }
+            }
+            // Find the page that will not be used for the longest time
+            int max = -1, repindex = 0;
+            for (int j = 0; j < nf; j++)
+            {
+                if (near[j] == -1)
+                {
+                    repindex = j; // If not found in future, replace this page
+                    break;
+                }
+                else if (near[j] > max)
+                {
+                    max = near[j];
+                    repindex = j;
+                }
+            }
+            p[repindex] = in[i]; // Replace the page
+            pgfaultcnt++;
+        }
+        dispFrames(in[i]); // Display current frame state
+    }
+    dispPgFaultCnt();
+}
+
+// LRU page replacement algorithm
+void lru()
+{
+    initialize();
+    int least[50]; // Last used index array
+    printf("\nFrames:\n");
+    printf(" F1  F2  F3 \n");
+    for (int i = 0; i < n; i++)
+    {
+        if (isHit(in[i]) == 0)
+        { // Page miss
+            for (int j = 0; j < nf; j++)
+            {
+                least[j] = -1; // Initialize last used index
+                for (int k = i - 1; k >= 0; k--)
+                {
+                    if (p[j] == in[k])
+                    {
+                        least[j] = k; // Last used index
+                        break;
+                    }
+                }
+            }
+            // Find the page that was least recently used
+            int min = n + 1, repindex = 0; // Use n + 1 as an indicator for empty
+            for (int j = 0; j < nf; j++)
+            {
+                if (least[j] < min)
+                {
+                    min = least[j];
+                    repindex = j;
+                }
+            }
+            p[repindex] = in[i]; // Replace the page
+            pgfaultcnt++;
+        }
+        dispFrames(in[i]); // Display current frame state
+    }
+    dispPgFaultCnt();
+}
+
+// Main function
+int main()
+{
+    int choice;
+    while (1)
+    {
+        printf("\nPage Replacement Algorithms\n");
+        printf("1. Enter data\n");
+        printf("2. FIFO\n");
+        printf("3. Optimal\n");
+        printf("4. LRU\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        switch (choice)
+        {
+        case 1:
+            getData();
+            break;
+        case 2:
+            fifo();
+            break;
+        case 3:
+            optimal();
+            break;
+        case 4:
+            lru();
+            break;
+        default:
+            return 0; // Exit the program
+        }
+    }
+}
