@@ -1,3 +1,8 @@
+Assignment No. 4:
+A. Thread synchronization using counting semaphores. Application to demonstrate: producerconsumer problem with counting semaphores and mutex.
+B. Thread synchronization and mutual exclusion using mutex. Application to demonstrate: ReaderWriter problem with reader priority.
+
+
 #include<stdio.h> 
 #include<stdlib.h>  
 #include<semaphor. h> 
