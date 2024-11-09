@@ -2,49 +2,83 @@ Assignment No. 4:
 A. Thread synchronization using counting semaphores. Application to demonstrate: producerconsumer problem with counting semaphores and mutex.
 B. Thread synchronization and mutual exclusion using mutex. Application to demonstrate: ReaderWriter problem with reader priority.
 
+#include<stdio.h>
+#include<sys/syscall.h>
+#include<pthread.h>
+#include<semaphore.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<sys/types.h>
 
-#include<stdio.h> 
-#include<stdlib.h>  
-#include<semaphor. h> 
-#include<pthread.h> 
-#include<unistd.h> 
+void *producer();
+void *consumer();
 
-sem_t e,f,s; 
-int data[5],in=0,out=0; 
-void * producer(void * arg){ 
-sem_wait(&e); 
-sem_wait(&s); 
+typedef struct {
 
-data[in]=rand(); 
-printf("\nProducer generated : %d",data[in]); 
-in=(in+1)%5; 
-sem_post(&s); 
-sem_post(&f); 
-} 
+	int buffer[20];
+	sem_t full,empty;
 
-void * consumer(void * arg){ 
-int value; 
-do{ 
-sem_wait(&f); 
-sem_wait(&s); 
-value=data[out]; 
-printf("\nConsumer read: %d",value); 
-out=(out+1)%5; 
-sem_post(&s); 
-sem_post(&e); 
-sem_getvalue(&e,&value); 
-}while(value!=5); 
-} 
-
-void main(){ 
-pthread_t p[8],c; 
-int i,j; 
-sem_init(&f,0,0); 
-sem_init(&e,0,5); 
-sem_init(&s,0,1); 
-pthread_create(&c,NULL,consumer,NULL); 
-for(i=0;i<8;++i) 
-pthread_create(&p[i],NULL,producer,NULL); 
-} 
-sleep(2); 
 }
+shared;
+
+shared sh;
+int item;
+int in=0 , out=0;
+sem_t mutex;
+
+int main() {
+	
+	pthread_t ptid1, ptid2, ctid1;
+	sem_init(&sh.empty,0,20);
+	sem_init(&sh.full,0,0);
+	sem_init(&mutex,0,1);
+
+	pthread_create(&ptid1 ,NULL ,producer ,NULL);
+	pthread_create(&ptid2 ,NULL ,producer ,NULL);
+	pthread_create(&ctid1 ,NULL ,consumer ,NULL);
+
+	pthread_join(ptid1 , NULL);
+	pthread_join(ptid2 , NULL);
+	pthread_join(ctid1 , NULL);
+	
+	return 0;
+}
+
+void *producer() {
+
+//	pthread_t item;
+	int ptid;
+	while(1)
+	{
+		item=in;
+		sem_wait(&sh.empty);
+		sem_wait(&mutex);
+
+		sh.buffer[in++]=item;
+		
+		printf("PRODUCER Thread id = %ld and Producer Item = %d \n",pthread_self(),item);
+
+		sem_post(&mutex);
+		sem_post(&sh.full);
+		sleep(3);	
+	}
+
+
+
+}
+void *consumer() {
+
+	int ctid;
+	while(out<=19 && in<=19) {
+		sem_wait(&sh.full);
+		sem_wait(&mutex);
+
+		item=sh.buffer[out++];
+		printf("\tCONSUMER Thread id = %ld and Consumer Item = %d \n",syscall(SYS_gettid,ctid),item);
+		
+		sem_post(&mutex);
+		sem_post(&sh.empty);
+		sleep(1);
+		}
+}
+
