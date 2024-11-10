@@ -1,6 +1,5 @@
 Assignment No. 4:
 A. Thread synchronization using counting semaphores. Application to demonstrate: producerconsumer problem with counting semaphores and mutex.
-B. Thread synchronization and mutual exclusion using mutex. Application to demonstrate: ReaderWriter problem with reader priority.
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdlib.h>
@@ -78,4 +77,69 @@ int main()
 
     return 0;
     
+}
+
+B. Thread synchronization and mutual exclusion using mutex. Application to demonstrate: ReaderWriter problem with reader priority.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/wait.h>
+
+#define MAX_SIZE 100
+
+// Function to sort an array in ascending order
+void sort_array(int *arr, int size) {
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = i + 1; j < size; j++) {
+            if (arr[i] > arr[j]) {
+                int temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
+}
+
+// Function to display the array in reverse order (child process)
+void display_reverse(int argc, char *argv[]) {
+    for (int i = argc - 1; i >= 1; i--) {
+        printf("%s ", argv[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    int arr[MAX_SIZE], n;
+
+    // Input array size and elements
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    // Sort the array
+    sort_array(arr, n);
+
+    pid_t pid = fork();
+    if (pid == 0) {
+        // Child process
+        char *args[n + 2];
+        args[0] = "/proc/self/exe"; // Re-execute the current program
+        for (int i = 0; i < n; i++) {
+            char str[12];
+            sprintf(str, "%d", arr[i]);
+            args[i + 1] = strdup(str);
+        }
+        args[n + 1] = NULL;
+
+        execve(args[0], args, NULL); // Execute the current program
+    } else {
+        // Parent process
+        wait(NULL); // Wait for the child to finish
+        printf("praent process finishing...");
+    }
+
+    return 0;
 }
