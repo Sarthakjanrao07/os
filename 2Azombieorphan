@@ -1,14 +1,41 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <stdlib.h>
+
+void bubble_sort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+}
+
+void print_array(int arr[], int n) {
+    for (int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
 
 int main() {
-    pid_t p;
-    printf("before fork\n");
+    int n;
+    printf("Enter the number of elements: ");
+    scanf("%d", &n);
 
-    p = fork();  // Create a child process
+    int arr[n];
+    printf("Enter %d integers: ", n);
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    // Forking to create a child process
+    pid_t p = fork();
 
     if (p < 0) {
         perror("Fork failed");
@@ -16,29 +43,38 @@ int main() {
     }
 
     if (p == 0) {  // Child process block
-        printf("I am child having id %d\n", getpid());
-        printf("My parent's id is %d\n", getppid());
+        printf("Child process (PID: %d) is sorting the array...\n", getpid());
+        
+        // Child sorts the array
+        bubble_sort(arr, n);
+        
+        printf("Sorted array by child: ");
+        print_array(arr, n);
 
-        // Orphan state simulation
-        sleep(5);  // This delay keeps the child alive after the parent has exited
+        // Simulate child completing early (Zombie state demonstration)
+        printf("Child process (PID: %d) completed sorting and is now exiting.\n", getpid());
+        exit(0);  // Exits without parent calling wait() immediately, making it a zombie process
+    } 
+    else {  // Parent process block
+        // Parent waits a moment to demonstrate the child as a zombie
+        sleep(2);  // This delay allows the child to exit first and become a zombie
 
-        printf("Child (PID: %d) is now orphaned and adopted by init (PID: %d)\n", getpid(), getppid());
-        exit(0);
-    } else {  // Parent process block
-        printf("My child's id is %d\n", p);
-        printf("I am parent having id %d\n", getpid());
+        printf("Parent process (PID: %d) is sorting the array...\n", getpid());
 
-        // Zombie state simulation
-        sleep(2);  // Allow child to finish and become a zombie
+        // Parent sorts the array
+        bubble_sort(arr, n);
+        
+        printf("Sorted array by parent: ");
+        print_array(arr, n);
 
-        printf("Parent process going to sleep, child should now be a zombie.\n");
-        // Uncomment the next line to prevent the child from becoming a zombie
-        // wait(NULL);  // Uncommenting this would collect the child process and prevent zombie state
+        // Parent calling wait() to clean up zombie child
+        wait(NULL);
+        printf("Parent has waited for the child to prevent zombie.\n");
 
-        // The parent exits without waiting for the child, creating an orphan
-        exit(0);  
+        // Orphan state demonstration
+        printf("Parent process (PID: %d) exiting, making child an orphan if it was still running.\n", getpid());
+        // Now, if the child was still running, it would be adopted by `init`.
     }
 
-    printf("Common\n");  // Both parent and child will print this line
     return 0;
 }
