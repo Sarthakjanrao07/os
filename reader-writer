@@ -59,3 +59,402 @@ int main() {
 
     return 0;
 }
+
+
+
+
+//Name : Kalash Malge
+//Roll No : TIA31
+//Batch : B
+
+
+//OS Lab 2 - SHELL PROGRAMS
+
+1)EMPLOYEE RECORDS
+
+
+while true;
+do
+	echo -e "1.Insert the record \n2.Display the record \n3.Search the reecord \n4.Delete the reecord \n5 Modify the the record \n6.Exit"
+	echo -e "\nEnter your choice :"
+	read ch
+	v=1
+	case $ch in
+		1)
+			while [ $v -eq 1 ]
+			do
+				echo -e "Enter employee number:"
+				read eno
+				echo -e "Enter employee name:"
+				read ename
+				echo -e "Enter  mobile number:"
+				read mobno
+				echo -e "Enter city:"
+				read city
+				
+				echo -e "$eno \t $ename \t  $mobno \t  $city ">>emp.txt
+				echo -e "\nDo you want to continue? Press 1 to continue or 0 for exit"
+				read v
+			done 
+				;;
+		2)	
+			cat emp.txt 
+			;;
+			
+		3)
+			echo -e "Enter employee name: "
+			read ename
+			grep $ename emp.txt ;;
+		
+		4) 
+			echo -e "Enter employee name to delete:"
+			read ename
+			grep -v $ename emp.txt >> temp.txt 
+			rm emp.txt
+			mv temp.txt emp.txt
+			;;
+			
+		5)
+			echo -e "\nEnter the employee name you want to Modify: "
+			read ename
+			echo -e "\nEnter the new employee name: "
+			read name
+			
+			sed -i s/$ename/$name/g emp.txt
+			;;
+		6)
+			exit 
+			;;
+		*)
+	esac
+done
+			
+			
+OUTPUT:
+
+student@student:~/Downloads$ bash Adress.sh
+1.Insert the record 
+2.Display the record 
+3.Search the reecord 
+4.Delete the reecord 
+5 Modify the the record 
+6.Exit
+
+Enter your choice :
+1
+Enter employee number:
+2
+Enter employee name:
+Amit
+Enter  mobile number:
+83749o340
+Enter city:
+Pune
+
+Do you want to continue? Press 1 to continue or 0 for exit
+1
+Enter employee number:
+3
+Enter employee name:
+Rohit
+Enter  mobile number:
+509859840
+Enter city:
+Mumbai
+
+Do you want to continue? Press 1 to continue or 0 for exit
+1
+Enter employee number:
+4
+Enter employee name:
+Yash
+Enter  mobile number:
+9843984930
+Enter city:
+Nagpur 
+
+Do you want to continue? Press 1 to continue or 0 for exit
+1
+Enter employee number:
+5    
+Enter employee name:
+Sumit
+Enter  mobile number:
+90854957985
+Enter city:
+Nashik
+
+Do you want to continue? Press 1 to continue or 0 for exit
+0
+1.Insert the record 
+2.Display the record 
+3.Search the reecord 
+4.Delete the reecord 
+5 Modify the the record 
+6.Exit
+
+Enter your choice :
+2
+1 	 Kalash 	  734938403 	  Akola 
+2 	 Amit 	  83749o340 	  Pune 
+3 	 Rohit 	  509859840 	  Mumbai 
+4 	 Yash 	  9843984930 	  Nagpur 
+5 	 Sumit 	  90854957985 	  Nashik 
+1.Insert the record 
+2.Display the record 
+3.Search the reecord 
+4.Delete the reecord 
+5 Modify the the record 
+6.Exit
+
+Enter your choice :
+3
+Enter employee name: 
+Yash
+4 	 Yash 	  9843984930 	  Nagpur 
+1.Insert the record 
+2.Display the record 
+3.Search the reecord 
+4.Delete the reecord 
+5 Modify the the record 
+6.Exit
+
+Enter your choice :
+4
+Enter employee name to delete:
+Sumit
+1.Insert the record 
+2.Display the record 
+3.Search the reecord 
+4.Delete the reecord 
+5 Modify the the record 
+6.Exit
+
+Enter your choice :
+2
+1 	 Kalash 	  734938403 	  Akola 
+2 	 Amit 	  83749o340 	  Pune 
+3 	 Rohit 	  509859840 	  Mumbai 
+4 	 Yash 	  9843984930 	  Nagpur 
+1.Insert the record 
+2.Display the record 
+3.Search the reecord 
+4.Delete the reecord 
+5 Modify the the record 
+6.Exit
+
+Enter your choice :
+5
+
+Enter the employee name you want to Modify: 
+Rohit
+
+Enter the new employee name: 
+Mohit
+1.Insert the record 
+2.Display the record 
+3.Search the reecord 
+4.Delete the reecord 
+5 Modify the the record 
+6.Exit
+
+Enter your choice :
+2
+1 	 Kalash 	  734938403 	  Akola 
+2 	 Amit 	  83749o340 	  Pune 
+3 	 Mohit 	  509859840 	  Mumbai 
+4 	 Yash 	  9843984930 	  Nagpur 
+1.Insert the record 
+2.Display the record 
+3.Search the reecord 
+4.Delete the reecord 
+5 Modify the the record 
+6.Exit
+
+Enter your choice :
+6
+
+
+
+
+
+
+
+2) FIBONACCI SERIES
+
+
+#!/bin/bash
+#bash fibonnacci.sh
+
+echo "Generate fibonnacci Series"
+echo "Enter up to what extent: "
+
+read n
+
+f0=1
+f1=1
+
+echo $f0
+echo $f1
+
+i=2
+
+while [ $i -le $n ]
+
+do 
+	f2=`expr $f0 + $f1`
+	echo $f2
+	
+	f0=$f1
+	f1=$f2
+	
+	i=`expr $i + 1`
+
+done
+
+
+
+student@student:~$ cd Downloads
+student@student:~/Downloads$ bash fibonnacci.sh
+Generate fibonnacci Series
+Enter up to what extent: 
+5
+1
+1
+2
+3
+5
+8
+
+
+3)Script to check if a string is a palindrome
+
+
+#!/bin/bash
+echo "Enter a string: "
+read str
+
+# Reverse the string
+rev_str=$(echo "$str" | rev)
+
+# Check if the string is equal to its reverse
+if [ "$str" == "$rev_str" ]; then
+    echo "The string '$str' is a palindrome."
+else
+    echo "The string '$str' is not a palindrome."
+fi
+
+
+
+student@student:~$ cd Downloads
+student@student:~/Downloads$ bash palindrome.sh
+Enter a string: 
+level
+The string 'level' is a palindrome.
+
+
+3) Script to check number is even or odd
+
+echo "Enter the number:"
+read num
+
+reminder=`expr $num % 2`
+if [ $reminder -eq 0 ]
+then
+     echo "Number is even"
+else
+  echo "number is odd"
+fi
+  echo 
+  
+  
+  
+student@student:~$ cd Downloads
+student@student:~/Downloads$ bash number.sh
+Enter the number:
+12
+Number is even
+
+student@student:~/Downloads$ bash number.sh
+Enter the number:
+7
+number is odd
+
+
+
+4) Arithmetic Operations
+
+#!/bin/bash
+x=11
+y=2
+z=`expr $x + $y`
+echo "result of addition is::$z"
+
+z=`expr $x \* $y`
+echo "result of mulitiplication is::$z"
+
+z=`expr $x / $y`
+echo "result of addition is::$z"
+
+
+
+student@student:~$ cd Downloads
+student@student:~/Downloads$ bash ArithmeticOP.sh
+result of addition is::13
+result of mulitiplication is::22
+result of addition is::5
+
+5)Options
+
+
+#!/bin/bash
+
+echo "Choose capital of India"
+echo -e "1->Mumbai\n2->Delhi\n3->Kolkata\n4->Chennai\n"
+read ch
+
+case $ch in
+     1)
+        echo "wrong option"
+        ;;
+     2)
+       echo "Corrct"
+        ;;
+     3)
+       echo "Wrong option"
+       ;;
+    4)
+       echo "Wrong option"
+       ;;         
+    *)
+      echo "Unknown option"
+ esac
+ 
+ 
+ 
+student@student:~$ cd Downloads
+student@student:~/Downloads$ bash Options.sh
+Choose capital of India
+1->Mumbai
+2->Delhi
+3->Kolkata
+4->Chennai
+
+3
+Wrong option
+student@student:~/Downloads$ bash fibonnacci.sh
+Choose capital of India
+1->Mumbai
+2->Delhi
+3->Kolkata
+4->Chennai
+
+2
+Correct
+
+     
+         
+  
+
+
+
