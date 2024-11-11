@@ -1,95 +1,76 @@
-#include<stdio.h>
-#include<unistd.h>
-#include<sys/types.h>
-#define MAX 20
-void bubble_asc(int arr[],int n)
-{ 
-int i,j,temp;
-for(i=0;i<n;i++)
-{
-    for(j=0;j<n-i-1;j++)
-    {
-        if(arr[j]>arr[j+1])
-	{
-	    temp=arr[j];
-	    arr[j]=arr[j+1];
-	    arr[j+1]=temp;
-	}
-    }
-}
-}
-void bubble_dsc(int arr[],int n)
-{ 
-int i,j,temp;
-for(i=0;i<n;i++)
-{
-    for(j=0;j<n-i-1;j++)
-    {
-        if(arr[j]<arr[j+1])
-	{
-	    temp=arr[j];
-	    arr[j]=arr[j+1];
-	    arr[j+1]=temp;
-	}
-    }
-}
-}
-void print(int arr[],int n)
-{
-   int i;
-   for(i=0;i<n;i++)
-   {
-       printf("\t%d",arr[i]);
-   }
-   printf("\n\n");
-}
-int main()
-{
-   int i,n,arr[MAX],f,pid;
-   printf("\nHOW MANY NOS DO YOU WANT IN ARRAY : ");
-   scanf("%d",&n);
-   printf("ENTER ARRAY ELEMENT : ");
-   for(i=0;i<n;i++)
-   {
-       scanf("%d",&arr[i]);
-   }
-   pid=fork();
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-   if(pid==0)
-   {
-         /*ORPHAN STATE */
-        printf("\n\t\t**********ORPHAN STATE**************\n");
+// Function to perform bubble sort
+void bubbleSort(int arr[], int n) {
+    int i, j, temp;
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                // Swap
+                temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+}
+
+int main() {
+    int n, i;
+    pid_t pid;
+
+    // Input number of integers
+    printf("Enter number of integers to sort: ");
+    scanf("%d", &n);
+
+    int arr[n];
+    printf("Enter the integers:\n");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    // Fork a child process
+    pid = fork();
+
+    if (pid < 0) {
+        perror("Fork failed");
+        return 1;
+    } else if (pid == 0) {
+        // Child Process: Sort the array and print it
+        printf("Child Process: Sorting the array...\n");
+        bubbleSort(arr, n);
+        printf("Child Process: Sorted array is: ");
+        for (i = 0; i < n; i++) {
+            printf("%d ", arr[i]);
+        }
+        printf("\n");
+
+        // Sleep to simulate orphan state if parent exits early
         sleep(5);
-        printf("\n\t CHILD PROCESS PID : %d ", getpid());
-        printf("\n\t PARENT PROCESS PPID : %d",getppid());
-        system("ps -el | grep init");
-   
-        printf("\n\nARRAY IN ASSCENDING ORDER : ");
-	    bubble_asc(arr,n);
-	    print(arr,n);
-	
-   }
-   
-   else if(pid >0)
-   {
-           /*ZOMBIE STATE */
-        
-        
-        printf("\n\t\t\t**********ZOMBIE STATE**************\n");
-        system("ps -el | grep Z");
-        f=wait(0);
-       
-        printf("\n\tTERMINATED CHILD PID : %d",f);
-        printf("\n\tPARENT PID (MAIN) : %d",getpid());
-        printf("\n\tPARENTS PARENT PPID (BASH) : %d ",getppid());
-    	printf("\n\nARRAY IN DESCENDING ORDER : ");
-        bubble_dsc(arr,n);
-        print(arr,n);
-        
-   }
-   else
-      printf("\nERROR IN FORK!!");
-      
-   return 0;
-}
+        printf("Child Process: Exiting.\n");
+        exit(0);  // Child exits, becoming a zombie if parent waits
+    } else {
+        // Parent Process: Sort the array independently
+        printf("Parent Process: Sorting the array...\n");
+        bubbleSort(arr, n);
+        printf("Parent Process: Sorted array is: ");
+        for (i = 0; i < n; i++) {
+            printf("%d ", arr[i]);
+        }
+        printf("\n");
 
+        // Wait for child process to prevent it from becoming a zombie
+        wait(NULL);
+        printf("Parent Process: Child has finished execution.\n");
+
+        // Sleep to make the child an orphan if it’s still running
+        sleep(2);
+        printf("Parent Process: Exiting.\n");
+    }
+
+    return 0;
+}
