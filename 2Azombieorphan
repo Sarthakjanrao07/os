@@ -1,17 +1,17 @@
+Program 2 (with wait() and Zombie Process handling):
+c
+Copy code
 #include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <sys/wait.h>
 
-// Function to perform bubble sort
 void bubbleSort(int arr[], int n) {
-    int i, j, temp;
-    for (i = 0; i < n - 1; i++) {
-        for (j = 0; j < n - i - 1; j++) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
             if (arr[j] > arr[j + 1]) {
-                // Swap
-                temp = arr[j];
+                int temp = arr[j];
                 arr[j] = arr[j + 1];
                 arr[j + 1] = temp;
             }
@@ -19,58 +19,50 @@ void bubbleSort(int arr[], int n) {
     }
 }
 
-int main() {
-    int n, i;
-    pid_t pid;
-
-    // Input number of integers
-    printf("Enter number of integers to sort: ");
+void main() {
+    int n;
+    printf("Enter the number of elements: ");
     scanf("%d", &n);
 
     int arr[n];
-    printf("Enter the integers:\n");
-    for (i = 0; i < n; i++) {
+    printf("Enter the elements:\n");
+    for (int i = 0; i < n; i++) {
         scanf("%d", &arr[i]);
     }
 
-    // Fork a child process
+    pid_t pid;
     pid = fork();
+    int status;
 
-    if (pid < 0) {
-        perror("Fork failed");
-        return 1;
-    } else if (pid == 0) {
-        // Child Process: Sort the array and print it
-        printf("Child Process: Sorting the array...\n");
-        bubbleSort(arr, n);
-        printf("Child Process: Sorted array is: ");
-        for (i = 0; i < n; i++) {
+    if (pid != 0) { // Parent process
+        sleep(2); // Allow the child process to finish first, making it a zombie
+        system("ps"); // Show processes before calling wait() (demonstrate zombie)
+        wait(&status); // Reap the child process to prevent permanent zombie
+
+        printf("\nThis is Parent Process\n");
+        printf("Parent process ID = %d\n", getppid());
+        printf("Parent child ID = %d\n", getpid());
+
+        bubbleSort(arr, n); // Parent sorts the array
+        printf("Parent sorted array: ");
+        for (int i = 0; i < n; i++) {
             printf("%d ", arr[i]);
         }
         printf("\n");
 
-        // Sleep to simulate orphan state if parent exits early
-        sleep(5);
-        printf("Child Process: Exiting.\n");
-        exit(0);  // Child exits, becoming a zombie if parent waits
-    } else {
-        // Parent Process: Sort the array independently
-        printf("Parent Process: Sorting the array...\n");
-        bubbleSort(arr, n);
-        printf("Parent Process: Sorted array is: ");
-        for (i = 0; i < n; i++) {
+        system("ps"); // Show process states after wait() (child is reaped)
+    } else { // Child process
+        printf("\nThis is Child Process\n");
+        printf("Child process ID = %d\n", getpid());
+        printf("Child Parent ID = %d\n", getppid());
+
+        bubbleSort(arr, n); // Child sorts the array
+        printf("Child sorted array: ");
+        for (int i = 0; i < n; i++) {
             printf("%d ", arr[i]);
         }
         printf("\n");
 
-        // Wait for child process to prevent it from becoming a zombie
-        wait(NULL);
-        printf("Parent Process: Child has finished execution.\n");
-
-        // Sleep to make the child an orphan if it’s still running
-        sleep(2);
-        printf("Parent Process: Exiting.\n");
+        exit(0); // Exit child process, creating a zombie until parent calls wait()
     }
-
-    return 0;
 }
