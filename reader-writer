@@ -4,45 +4,36 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-// Semaphore to control write access
 sem_t writeLock;
 sem_t readLock;
 int readCount = 0;
 
 void *reader(void *arg) {
-    // Begin reading
-    sem_wait(&readLock);  // Lock for reading count modification
+    sem_wait(&readLock);
     readCount++;
     if (readCount == 1) {
-        sem_wait(&writeLock);  // First reader locks the writer
+        sem_wait(&writeLock);
     }
-    sem_post(&readLock);  // Unlock after modifying readCount
+    sem_post(&readLock);
 
-    // Simulate reading
-    printf("Reader %ld is reading\n", pthread_self());
-    sleep(1);  // Simulate reading time
+    printf("Reader %ld is reading\n");
 
-    // End reading
-    sem_wait(&readLock);  // Lock for reading count modification
+    sem_wait(&readLock);
     readCount--;
     if (readCount == 0) {
-        sem_post(&writeLock);  // Last reader releases the writer
+        sem_post(&writeLock);
     }
-    sem_post(&readLock);  // Unlock after modifying readCount
+    sem_post(&readLock);
 
     return NULL;
 }
 
 void *writer(void *arg) {
-    // Begin writing
-    sem_wait(&writeLock);  // Lock for writing
+    sem_wait(&writeLock);
 
-    // Simulate writing
-    printf("Writer %ld is writing\n", pthread_self());
-    sleep(2);  // Simulate writing time
+    printf("Writer %ld is writing\n");
 
-    // End writing
-    sem_post(&writeLock);  // Release the lock after writing
+    sem_post(&writeLock);
 
     return NULL;
 }
@@ -50,23 +41,19 @@ void *writer(void *arg) {
 int main() {
     pthread_t readers[3], writers[3];
 
-    // Initialize semaphores
-    sem_init(&readLock, 0, 1);  // Mutex-like semaphore for readCount
-    sem_init(&writeLock, 0, 1); // Semaphore to ensure one writer at a time
+    sem_init(&readLock, 0, 1);
+    sem_init(&writeLock, 0, 1);
 
-    // Create 3 reader threads and 3 writer threads
     for (int i = 0; i < 3; i++) {
         pthread_create(&readers[i], NULL, reader, NULL);
         pthread_create(&writers[i], NULL, writer, NULL);
     }
 
-    // Wait for all reader and writer threads to finish
     for (int i = 0; i < 3; i++) {
         pthread_join(readers[i], NULL);
         pthread_join(writers[i], NULL);
     }
 
-    // Destroy semaphores
     sem_destroy(&readLock);
     sem_destroy(&writeLock);
 
